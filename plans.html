@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Day Planner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FFF0F5;
+            --card-bg: #FFFFFF;
+            --pink-primary: #FFB7CE;
+            --pink-dark: #F08080;
+            --lavender: #E0BBE4;
+            --peach: #FFDAB9;
+            --mint: #BFFCC6;
+            --text-color: #5D5D5D;
+            --border-radius: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 2rem 1rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            color: var(--pink-dark);
+            font-size: 2.5rem;
+        }
+
+        .main-layout {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        /* Lists Styles */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        section {
+            background: var(--card-bg);
+            padding: 1.2rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            border-top: 6px solid var(--pink-primary);
+            position: relative;
+        }
+
+        section.sites { border-color: var(--lavender); }
+        section.eat { border-color: var(--peach); }
+        section.activities { border-color: var(--mint); }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .zoom-icon {
+            cursor: pointer;
+            font-size: 0.9rem;
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .zoom-icon:hover {
+            background: var(--pink-primary);
+            color: white;
+        }
+
+        .draggable-item {
+            background: #f9f9f9;
+            border: 2px dashed #ddd;
+            padding: 10px 15px;
+            border-radius: 50px;
+            margin-bottom: 8px;
+            cursor: grab;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .draggable-item:hover {
+            border-color: var(--pink-primary);
+            background: #fff;
+            transform: scale(1.02);
+        }
+
+        .add-btn {
+            width: 100%;
+            background: none;
+            border: 2px dashed var(--pink-primary);
+            color: var(--pink-dark);
+            padding: 8px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+
+        .add-btn:hover {
+            background: var(--pink-primary);
+            color: white;
+        }
+
+        /* Calendar Styles */
+        .calendar-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            border-top: 1px solid #eee;
+        }
+
+        .time-label {
+            padding: 15px 0;
+            font-size: 0.8rem;
+            color: #999;
+            border-bottom: 1px solid #eee;
+            text-align: right;
+            padding-right: 15px;
+        }
+
+        .drop-zone {
+            border-bottom: 1px solid #eee;
+            position: relative;
+            min-height: 50px;
+            background: #fafafa;
+            transition: background 0.2s;
+        }
+
+        .drop-zone.drag-over {
+            background: var(--bg-color);
+        }
+
+        /* Scheduled Task Card */
+        .scheduled-task {
+            position: absolute;
+            left: 5px;
+            right: 5px;
+            top: 2px;
+            z-index: 10;
+            background: var(--pink-primary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .task-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .duration-btns {
+            display: flex;
+            gap: 5px;
+        }
+
+        .time-btn {
+            background: rgba(255,255,255,0.3);
+            border: none;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+
+        .time-btn:hover { background: rgba(255,255,255,0.5); }
+
+        .delete-task {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg-color);
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            border-radius: 30px;
+            padding: 2.5rem;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .close-modal {
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--pink-dark);
+        }
+
+        .detail-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 20px;
+            margin-bottom: 1.5rem;
+            border-left: 8px solid var(--pink-primary);
+        }
+
+        .detail-item h3 {
+            margin-bottom: 10px;
+            color: var(--pink-dark);
+        }
+
+        .detail-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .detail-inputs input, .detail-inputs textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            font-family: inherit;
+        }
+
+        .detail-inputs textarea {
+            grid-column: span 2;
+            resize: none;
+            height: 60px;
+        }
+
+        @media (max-width: 900px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .detail-inputs { grid-template-columns: 1fr; }
+            .detail-inputs textarea { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Valentine's Day Scheduler</h1>
+        <p>Drag your favorites or zoom in for more detail</p>
+    </header>
+
+    <div class="main-layout">
+        <div class="sidebar">
+            <!-- Section 1: Sites -->
+            <section class="sites" id="sites-list">
+                <h2>🏰 Sites <span class="zoom-icon" onclick="openModal('sites-list')">🔍 Zoom</span></h2>
+                <div class="list-content" ondrop="dropToList(event)" ondragover="allowDrop(event)">
+                    <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="site1">Sunset Bridge Lookout</div>
+                    <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="site2">Botanical Gardens</div>
+                </div>
+                <button class="add-btn" onclick="addNewItem('sites-list')">+ Add Site</button>
+            </section>
+
+            <!-- Section 2: Eat -->
+            <section class="eat" id="eat-list">
+                <h2>🍰 Dining <span class="zoom-icon" onclick="openModal('eat-list')">🔍 Zoom</span></h2>
+                <div class="list-content" ondrop="dropToList(event)" ondragover="allowDrop(event)">
+                    <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="eat1">Pink Macaron Cafe</div>
+                    <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="eat2">Candlelit Bistro</div>
+                </div>
+                <button class="add-btn" onclick="addNewItem('eat-list')">+ Add Dining</button>
+            </section>
+
+            <!-- Section 3: Activities -->
+            <section class="activities" id="activities-list">
+                <h2>🎈 Fun <span class="zoom-icon" onclick="openModal('activities-list')">🔍 Zoom</span></h2>
+                <div class="list-content" ondrop="dropToList(event)" ondragover="allowDrop(event)">
+                    <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="act1">Pottery Class</div>
+                    <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="act2">Jazz Performance</div>
+                </div>
+                <button class="add-btn" onclick="addNewItem('activities-list')">+ Add Activity</button>
+            </section>
+        </div>
+
+        <div class="calendar-container">
+            <h2 style="text-align: left; margin-bottom: 20px;">📅 Today's Schedule</h2>
+            <div id="calendar-grid">
+                <!-- Hours generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Zoom Modal -->
+    <div class="modal-overlay" id="zoomModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Section Details</h2>
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="modalItemsList">
+                <!-- Items with details go here -->
+            </div>
+            <button class="add-btn" id="modalAddBtn">Add New Item to this List</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Store for Extra Details
+        const itemDetails = {
+            'site1': { url: '', notes: 'Perfect spot for photos right as the sun dips.' },
+            'site2': { url: '', notes: 'The orchid house is a must-see.' },
+            'eat1': { url: 'https://example.com', notes: 'Best lavender lattes in the city.' },
+            'eat2': { url: '', notes: 'Book the corner table for more privacy.' },
+            'act1': { url: '', notes: 'Wear clothes you don’t mind getting messy!' },
+            'act2': { url: '', notes: 'Show starts at 8, get there early for good seats.' }
+        };
+
+        // Initialize Calendar
+        const grid = document.getElementById('calendar-grid');
+        for (let i = 8; i <= 22; i++) {
+            const hour = i > 12 ? i - 12 : i;
+            const ampm = i >= 12 ? 'PM' : 'AM';
+            
+            const timeRow = document.createElement('div');
+            timeRow.className = 'time-grid';
+            timeRow.innerHTML = `
+                <div class="time-label">${hour}:00 ${ampm}</div>
+                <div class="drop-zone" ondrop="dropToCalendar(event)" ondragover="allowDrop(event)" data-hour="${i}"></div>
+            `;
+            grid.appendChild(timeRow);
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+            if (e.target.classList.contains('drop-zone')) {
+                e.target.classList.add('drag-over');
+            }
+        }
+
+        function drag(e) {
+            e.dataTransfer.setData("text", e.target.id);
+            e.dataTransfer.setData("content", e.target.innerText);
+            e.dataTransfer.setData("origin", e.target.parentElement.classList.contains('drop-zone') ? "calendar" : "list");
+        }
+
+        function dropToCalendar(e) {
+            e.preventDefault();
+            const dropZone = e.target.closest('.drop-zone');
+            dropZone.classList.remove('drag-over');
+            
+            const id = e.dataTransfer.getData("text");
+            const content = e.dataTransfer.getData("content");
+            const origin = e.dataTransfer.getData("origin");
+
+            if (origin === "list") {
+                const originalElement = document.getElementById(id);
+                if (originalElement) originalElement.remove();
+            }
+
+            createScheduledTask(dropZone, content, id);
+        }
+
+        function createScheduledTask(container, text, id, height = 46) {
+            container.innerHTML = '';
+            const task = document.createElement('div');
+            task.className = 'scheduled-task';
+            task.id = 'task-' + id;
+            task.style.height = height + 'px';
+            
+            task.innerHTML = `
+                <span>${text}</span>
+                <div class="task-controls">
+                    <div class="duration-btns">
+                        <button class="time-btn" onclick="adjustTime(this, -15)">-15</button>
+                        <button class="time-btn" onclick="adjustTime(this, 15)">+15</button>
+                    </div>
+                    <span class="delete-task" onclick="returnToList(this, '${text}', '${id}')">✕</span>
+                </div>
+            `;
+            container.appendChild(task);
+        }
+
+        function adjustTime(btn, amount) {
+            const task = btn.closest('.scheduled-task');
+            let currentHeight = parseInt(task.style.height);
+            let newHeight = currentHeight + (amount * (50/60));
+            if (newHeight < 30) newHeight = 30;
+            task.style.height = newHeight + 'px';
+            task.style.zIndex = Math.floor(newHeight);
+        }
+
+        function returnToList(btn, text, id) {
+            const task = btn.closest('.scheduled-task');
+            task.remove();
+            
+            let listId = 'activities-list';
+            if (id.startsWith('site')) listId = 'sites-list';
+            if (id.startsWith('eat')) listId = 'eat-list';
+            
+            const listContent = document.getElementById(listId).querySelector('.list-content');
+            const item = createDraggableElement(id, text);
+            listContent.appendChild(item);
+        }
+
+        function createDraggableElement(id, text) {
+            const item = document.createElement('div');
+            item.className = 'draggable-item';
+            item.draggable = true;
+            item.id = id;
+            item.innerText = text;
+            item.ondragstart = drag;
+            return item;
+        }
+
+        function addNewItem(sectionId, preFilledText = null) {
+            const text = preFilledText || prompt("What would you like to add?");
+            if (!text) return;
+
+            const listContent = document.getElementById(sectionId).querySelector('.list-content');
+            const id = (sectionId.split('-')[0].slice(0, 3)) + '-' + Date.now();
+            
+            const item = createDraggableElement(id, text);
+            listContent.appendChild(item);
+            
+            // Add to data store
+            itemDetails[id] = { url: '', notes: '' };
+            
+            // If modal is open, refresh it
+            if (document.getElementById('zoomModal').style.display === 'flex') {
+                openModal(sectionId);
+            }
+        }
+
+        // Modal Logic
+        function openModal(sectionId) {
+            const modal = document.getElementById('zoomModal');
+            const title = document.getElementById('modalTitle');
+            const list = document.getElementById('modalItemsList');
+            const section = document.getElementById(sectionId);
+            
+            title.innerText = section.querySelector('h2').innerText.replace('🔍 Zoom', '');
+            list.innerHTML = '';
+            
+            // Get all items in this section's list
+            const items = section.querySelectorAll('.draggable-item');
+            items.forEach(item => {
+                const details = itemDetails[item.id] || { url: '', notes: '' };
+                const div = document.createElement('div');
+                div.className = 'detail-item';
+                div.innerHTML = `
+                    <h3>${item.innerText}</h3>
+                    <div class="detail-inputs">
+                        <input type="text" placeholder="Website URL (e.g. reservation link)" value="${details.url}" onchange="updateDetails('${item.id}', 'url', this.value)">
+                        <textarea placeholder="Extra notes (Address, what to wear, etc.)" onchange="updateDetails('${item.id}', 'notes', this.value)">${details.notes}</textarea>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+            document.getElementById('modalAddBtn').onclick = () => addNewItem(sectionId);
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('zoomModal').style.display = 'none';
+        }
+
+        function updateDetails(id, field, value) {
+            if (!itemDetails[id]) itemDetails[id] = { url: '', notes: '' };
+            itemDetails[id][field] = value;
+        }
+
+        function dropToList(e) {
+            e.preventDefault();
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('zoomModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
