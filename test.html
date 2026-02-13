@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pastel Valentine's Dreamscape</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #fbcce1;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+            color: #555;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui-overlay">
+        <h1>Pastel Dreamscape</h1>
+        <p>A Valentines Three.js Scene</p>
+    </div>
+
+     <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.min.js"
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- PHASE 1: SCENE FOUNDATION & FOG ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color('#fbcce1'); // Pastel Lavender/Pink base
+        
+        // FogExp2 for that dense "baby stuffy" occlusion
+        // We use a light turquoise for the fog color to contrast the pink background
+        scene.fog = new THREE.FogExp2('#d1f2f2', 0.07);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 4, 12);
+        camera.lookAt(0, 2, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+
+        // --- PHASE 2: LIGHTING & STRUCTURED FLOOR ---
+        // Hemisphere light creates the "Pink mixed with Turquoise" ambient effect
+        const hemiLight = new THREE.HemisphereLight('#A1E3F9', '#fbcce1', 1.2);
+        scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight('#ffffff', 0.8);
+        dirLight.position.set(5, 10, 7);
+        scene.add(dirLight);
+
+        // Toon Shading Gradient Map (3-step shading for structured look)
+        const colors = new Uint8Array([0, 128, 255]);
+        const gradientMap = new THREE.DataTexture(colors, colors.length, 1, THREE.RedFormat);
+        gradientMap.needsUpdate = true;
+
+        // Structured Floor
+        const floorSize = 100;
+        const floorGeom = new THREE.PlaneGeometry(floorSize, floorSize, 50, 50);
+        const floorMat = new THREE.MeshToonMaterial({ 
+            color: '#fdfdfd', 
+            gradientMap: gradientMap,
+            side: THREE.DoubleSide
+        });
+        
+        const floor = new THREE.Mesh(floorGeom, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
+
+        // Add a grid helper for that "structured" visual aid
+        const grid = new THREE.GridHelper(floorSize, 40, '#fbcce1', '#e0f7fa');
+        grid.position.y = 0.01;
+        scene.add(grid);
+
+        // --- PHASE 3: SCATTERED GEOMETRY (Torus & Hearts) ---
+        const objects = [];
+        const pastelPalette = ['#B2F2BB', '#A1E3F9', '#FEF9C3', '#FFD1DC', '#E0BBE4'];
+
+        // Heart Shape Path
+        const x = 0, y = 0;
+        const heartShape = new THREE.Shape();
+        heartShape.moveTo( x + 0.5, y + 0.5 );
+        heartShape.bezierCurveTo( x + 0.5, y + 0.5, x + 0.4, y, x, y );
+        heartShape.bezierCurveTo( x - 0.6, y, x - 0.6, y + 0.7,x - 0.6, y + 0.7 );
+        heartShape.bezierCurveTo( x - 0.6, y + 1.1, x - 0.3, y + 1.54, x + 0.5, y + 1.9 );
+        heartShape.bezierCurveTo( x + 1.2, y + 1.54, x + 1.6, y + 1.1, x + 1.6, y + 0.7 );
+        heartShape.bezierCurveTo( x + 1.6, y + 0.7, x + 1.6, y, x + 1, y );
+        heartShape.bezierCurveTo( x + 0.7, y, x + 0.5, y + 0.5, x + 0.5, y + 0.5 );
+
+        const heartGeom = new THREE.ExtrudeGeometry(heartShape, { 
+            depth: 0.4, 
+            bevelEnabled: true, 
+            bevelThickness: 0.1, 
+            bevelSize: 0.1 
+        });
+        heartGeom.center(); // Center the heart geometry
+
+        const torusGeom = new THREE.TorusGeometry(0.8, 0.3, 16, 100);
+
+        for (let i = 0; i < 60; i++) {
+            const isHeart = Math.random() > 0.4;
+            const material = new THREE.MeshToonMaterial({ 
+                color: pastelPalette[Math.floor(Math.random() * pastelPalette.length)],
+                gradientMap: gradientMap 
+            });
+            
+            const mesh = new THREE.Mesh(isHeart ? heartGeom : torusGeom, material);
+            
+            // Random distribution within the fog range
+            const range = 35;
+            mesh.position.set(
+                (Math.random() - 0.5) * range,
+                Math.random() * 1.5 + 0.5, 
+                (Math.random() - 0.5) * range
+            );
+            
+            mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+            mesh.scale.setScalar(Math.random() * 0.4 + 0.6);
+            
+            // Phase 4 Animation Data
+            mesh.userData = {
+                rotationSpeed: (Math.random() - 0.5) * 0.02,
+                floatOffset: Math.random() * Math.PI * 2,
+                floatSpeed: 0.5 + Math.random() * 0.5
+            };
+            
+            scene.add(mesh);
+            objects.push(mesh);
+        }
+
+        // --- PHASE 4: ANIMATION LOOP ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            objects.forEach((obj) => {
+                // Rotation
+                obj.rotation.y += obj.userData.rotationSpeed;
+                obj.rotation.z += obj.userData.rotationSpeed * 0.5;
+
+                // Vertical Floating (Sine wave)
+                obj.position.y = (1.5 + Math.sin(elapsedTime * obj.userData.floatSpeed + obj.userData.floatOffset)) * 1.2;
+            });
+
+            // Camera subtle movement
+            camera.position.x = Math.sin(elapsedTime * 0.2) * 2;
+            camera.lookAt(0, 2, 0);
+
+            renderer.render(scene, camera);
+        }
+
+        // START
+        animate();
+
+        // Responsive Resizing
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

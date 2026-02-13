@@ -6,42 +6,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Three.js Isometric Structure</title>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: #f0f0f0;
-            font-family: sans-serif;
+    body {
+        margin: 0;
+        overflow: hidden;
+        background-color: #fbcce1;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+   #ui-overlay {
+    position: absolute;
+    pointer-events: none;
+    color: #555;
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+}
+
+ .btn-group {
+     pointer-events: all;
+ }
+
+/* Desktop/Laptop - Left side */
+@media (min-width: 1024px) {
+    #ui-overlay {
+        top: 20px;
+        left: 20px;
+        width: auto;
+    }
+
+    #ui-overlay h2 {
+        margin: 0;
+        font-size: 24px;
+    }
+
+    .btn-group button {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+}
+
+    /* Tablet - Center bottom */
+    @media (min-width: 768px) and (max-width: 1023px) {
+        #ui-overlay {
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
         }
 
+        #ui-overlay h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .btn-group button {
+            padding: 10px 16px;
+            font-size: 13px;
+        }
+    }
+
+    /* Mobile - Center bottom */
+    @media (max-width: 767px) {
         #ui-overlay {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            z-index: 10;
-            width: 220px;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            width: 85%;
+            max-width: 300px;
+            padding: 15px;
+        }
+
+        #ui-overlay h2 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        #ui-overlay p {
+            font-size: 9px;
         }
 
         .btn-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 8px;
+            margin-top: 12px;
         }
 
-        button {
-            padding: 12px;
+        .btn-group button {
+            padding: 10px 12px;
+            font-size: 12px;
             border: 1px solid #ddd;
             background: white;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
-            font-weight: bold;
-            color: #444;
-            text-align: center;
         }
 
         button:hover {
@@ -54,26 +113,31 @@
             color: white;
             border-color: #4F46E5;
         }
+    }
 
-        #status {
-            font-size: 11px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-    </style>
+    #status {
+        font-size: 11px;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    canvas {
+        display: block;
+    }
+</style>
 </head>
 
 <body>
 
 
     <div id="ui-overlay">
-        <h2 style="margin:0; font-size: 18px;">Character Switcher</h2>
+        <h2 style="margin:0; font-size: 18px;">Do you want to be my Valentine?</h2>
         <div id="status">Loading assets...</div>
         <div class="btn-group">
-            <button id="btn1" onclick="switchCharacter(1)">Character 1 (Idle)</button>
-            <button id="btn2" onclick="switchCharacter(2)">Character 2 (Twerk)</button>
+            <button id="btn1" onclick="switchCharacter(1)">Definitely Yes</button>
+            <button id="btn2" onclick="switchCharacter(2)">Maybe No</button>
         </div>
-        <p style="font-size: 11px; color: #888; margin-top: 15px;">Scroll to zoom • Mouse to rotate room</p>
+        <p style="font-size: 11px; color: #888; margin-top: 15px;">skip</p>
     </div>
 
     <!-- Updated CDN links based on your request -->
@@ -82,139 +146,125 @@
 
     <script>
         // Variables from your script
-        let scene, camera, renderer, structure;
-        let characterModel = null;
-        let characterModel1 = null;
-        let mixer1 = null;
-        let mixer2 = null;
-        let viewSize = 3;
-        let clouds = [];
 
+
+
+        //////////////////////////////////////////////////////////////////////////
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color('#fbcce1');
+        scene.fog = new THREE.FogExp2('#d1f2f2', 0.04);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(1.5, 1.5, 1.5);
+        camera.lookAt(0, 1, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+        const clock = new THREE.Clock();
+
+        // --- PHASE 2: LIGHTING & STRUCTURED FLOOR ---
+        const hemiLight = new THREE.HemisphereLight('#A1E3F9', '#fbcce1', .9);
+        scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight('#ffffff', 2.5);
+        dirLight.position.set(1, 1, 1);
+        //dirLight.position.set(5, 10, 7);
+        scene.add(dirLight);
+
+        // Toon Shading Gradient Map
         const colors = new Uint8Array([0, 128, 255]);
         const gradientMap = new THREE.DataTexture(colors, colors.length, 1, THREE.RedFormat);
         gradientMap.needsUpdate = true;
 
+        // Structured Floor
+        const floorSize = 100;
+        const floorGeom = new THREE.PlaneGeometry(floorSize, floorSize, 50, 50);
+        const floorMat = new THREE.MeshToonMaterial({
+            color: '#fdfdfd',
+            gradientMap: gradientMap,
+            side: THREE.DoubleSide
+        });
+
+        const floor = new THREE.Mesh(floorGeom, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
+
+        const grid = new THREE.GridHelper(floorSize, 40, '#fbcce1', '#e0f7fa');
+        grid.position.y = 0.01;
+        scene.add(grid);
+
+        // --- PHASE 3: SCATTERED GEOMETRY (Torus & Hearts) ---
+        const objects = [];
+        const pastelPalette = ['#B2F2BB', '#A1E3F9', '#FEF9C3', '#FFD1DC', '#E0BBE4'];
+
+        // Heart Shape Path
+        const x = 0, y = 0;
+        const heartShape = new THREE.Shape();
+        heartShape.moveTo(x + 0.5, y + 0.5);
+        heartShape.bezierCurveTo(x + 0.5, y + 0.5, x + 0.4, y, x, y);
+        heartShape.bezierCurveTo(x - 0.6, y, x - 0.6, y + 0.7, x - 0.6, y + 0.7);
+        heartShape.bezierCurveTo(x - 0.6, y + 1.1, x - 0.3, y + 1.54, x + 0.5, y + 1.9);
+        heartShape.bezierCurveTo(x + 1.2, y + 1.54, x + 1.6, y + 1.1, x + 1.6, y + 0.7);
+        heartShape.bezierCurveTo(x + 1.6, y + 0.7, x + 1.6, y, x + 1, y);
+        heartShape.bezierCurveTo(x + 0.7, y, x + 0.5, y + 0.5, x + 0.5, y + 0.5);
+
+        const heartGeom = new THREE.ExtrudeGeometry(heartShape, {
+            depth: 0.4,
+            bevelEnabled: true,
+            bevelThickness: 0.1,
+            bevelSize: 0.1
+        });
+        heartGeom.center();
+        heartGeom.scale(0.9, 0.9, 0.9);
+
+        const torusGeom = new THREE.TorusGeometry(0.6, 0.2, 8, 100);
+
+        for (let i = 0; i < 60; i++) {
+            const isHeart = Math.random() > 0.4; // 60% chance for hearts, 40% for torus
+            const material = new THREE.MeshToonMaterial({
+                color: pastelPalette[Math.floor(Math.random() * pastelPalette.length)],
+                gradientMap: gradientMap
+            });
+
+            const mesh = new THREE.Mesh(isHeart ? heartGeom : torusGeom, material);
+
+            const range = 20;
+            mesh.position.set(
+                (Math.random() - 0.5) * range,
+                Math.random() * 1.5 + 0.5,
+                (Math.random() - 0.5) * range
+            );
+
+            mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+            mesh.scale.setScalar(Math.random() * 0.4 + 0.6);
+
+            mesh.userData = {
+                rotationSpeed: (Math.random() - 0.5) * 0.02,
+                floatOffset: Math.random() * Math.PI * 2,
+                floatSpeed: 0.5 + Math.random() * 0.5
+            };
+
+            scene.add(mesh);
+            objects.push(mesh);
+        }
+        //////////////////////////////////////////////////////////////////////////
+        let characterModel = null;
+        let characterModel1 = null;
+        let characterModel2 = null;
+
+        let mixer1 = null;
+        let mixer2 = null;
+        let mixer3 = null;
+
+        //let viewSize = 3;
 
         function init() {
             // 1. Scene Setup
-            scene = new THREE.Scene();
-
-            const turquoiseColor = 0x76eec6; // Soft Turquoise
-            scene.background = new THREE.Color(0xffcbe1);
-            scene.fog = new THREE.Fog(turquoiseColor, 7.85, 14);
-            //scene.fog = new THREE.FogExp2(turquoiseColor, 0.07);
-
-
-            // 2. Camera Setup (Your specific position and lookAt)
-            const aspect = window.innerWidth / window.innerHeight;
-            camera = new THREE.OrthographicCamera(
-                -viewSize * aspect, viewSize * aspect,
-                viewSize, -viewSize,
-                0.1, 1000
-            );
-            camera.position.set(5, 2, 5);
-            camera.lookAt(0, 1, 0);
-
-            // 3. Renderer Setup (Your specific settings)
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            document.body.appendChild(renderer.domElement);
-
-            // 4. Lighting (Your specific values)
-            const ambientLight = new THREE.AmbientLight(0xffe4e1, 2.8); // Pinkish tint ambient
-            scene.add(ambientLight);
-
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-            dirLight.position.set(8, 12, 5);
-            dirLight.castShadow = true;
-            scene.add(dirLight);
 
             // 5. Structure Creation (Your Wheat material settings)
             structure = new THREE.Group();
-
-            const whiteMaterial = new THREE.MeshStandardMaterial({
-                color: 0xf5deb3,
-                roughness: 1,
-                metalness: 0.75
-            });
-
-            const floorGeom = new THREE.BoxGeometry(4, 0.15, 4);
-            const floorMesh = new THREE.Mesh(floorGeom, whiteMaterial);
-            floorMesh.receiveShadow = true;
-            structure.add(floorMesh);
-
-            const wall1Geom = new THREE.BoxGeometry(0.15, 3.2, 4);
-            const wall1Mesh = new THREE.Mesh(wall1Geom, whiteMaterial);
-            wall1Mesh.position.set(-1.925, 1.675, 0);
-            wall1Mesh.castShadow = true;
-            wall1Mesh.receiveShadow = true;
-            structure.add(wall1Mesh);
-
-            const wall2Geom = new THREE.BoxGeometry(4, 3.2, 0.15);
-            const wall2Mesh = new THREE.Mesh(wall2Geom, whiteMaterial);
-            wall2Mesh.position.set(0, 1.675, -1.925);
-            wall2Mesh.castShadow = true;
-            wall2Mesh.receiveShadow = true;
-            structure.add(wall2Mesh);
-            /////////////////////////////////////////////////////////////////////////
-            const objects = [];
-            const pastelPalette = ['#B2F2BB', '#A1E3F9', '#FEF9C3', '#FFD1DC', '#E0BBE4'];
-
-            // Heart Shape Path
-            const x = 0, y = 0;
-            const heartShape = new THREE.Shape();
-            heartShape.moveTo(x + 0.5, y + 0.5);
-            heartShape.bezierCurveTo(x + 0.5, y + 0.5, x + 0.4, y, x, y);
-            heartShape.bezierCurveTo(x - 0.6, y, x - 0.6, y + 0.7, x - 0.6, y + 0.7);
-            heartShape.bezierCurveTo(x - 0.6, y + 1.1, x - 0.3, y + 1.54, x + 0.5, y + 1.9);
-            heartShape.bezierCurveTo(x + 1.2, y + 1.54, x + 1.6, y + 1.1, x + 1.6, y + 0.7);
-            heartShape.bezierCurveTo(x + 1.6, y + 0.7, x + 1.6, y, x + 1, y);
-            heartShape.bezierCurveTo(x + 0.7, y, x + 0.5, y + 0.5, x + 0.5, y + 0.5);
-
-            const heartGeom = new THREE.ExtrudeGeometry(heartShape, {
-                depth: 0.4,
-                bevelEnabled: true,
-                bevelThickness: 0.1,
-                bevelSize: 0.1
-            });
-            heartGeom.center(); // Center the heart geometry
-
-            const torusGeom = new THREE.TorusGeometry(0.8, 0.3, 16, 100);
-            for (let i = 0; i < 60; i++) {
-                const isHeart = Math.random() > 0.4;
-                const material = new THREE.MeshToonMaterial({
-                    color: pastelPalette[Math.floor(Math.random() * pastelPalette.length)],
-                    gradientMap: gradientMap
-                });
-
-                const mesh = new THREE.Mesh(isHeart ? heartGeom : torusGeom, material);
-
-                // Random distribution within the fog range
-                const range = 35;
-                mesh.position.set(
-                    (Math.random() - 0.5) * range,
-                    Math.random() * 1.5 + 0.5,
-                    (Math.random() - 0.5) * range
-                );
-
-                mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
-                mesh.scale.setScalar(Math.random() * 0.4 + 0.6);
-
-                // Phase 4 Animation Data
-                mesh.userData = {
-                    rotationSpeed: (Math.random() - 0.5) * 0.02,
-                    floatOffset: Math.random() * Math.PI * 2,
-                    floatSpeed: 0.5 + Math.random() * 0.5
-                };
-
-                scene.add(mesh);
-                objects.push(mesh);
-            }
-
-            /////////////////////////////////////////////////////////////////////////
             scene.add(structure);
             // 6. Loading sequence (Refactored for non-module GLTFLoader)
             const loader = new THREE.GLTFLoader();
@@ -242,7 +292,7 @@
 
             // Load second model
             loader.load(
-                'models/rejection.glb',
+                'models/twerk.glb',
                 function (gltf) {
                     characterModel1 = gltf.scene;
                     characterModel1.position.set(0, 0.1, 0);
@@ -261,105 +311,70 @@
                     document.getElementById('status').innerText = "All Characters Ready";
                 }
             );
-            createClouds();
-            // Listeners
-            window.addEventListener('resize', onWindowResize, false);
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('wheel', onWheel, { passive: false });
+            loader.load('models/rejection.glb', (gltf) => {
+                characterModel2 = gltf.scene;
+                characterModel2.traverse(n => {
+                    if (n.isMesh) {
+                        n.castShadow = true;
+                        n.receiveShadow = true;
+                    }
+                });
+                characterModel2.position.set(0, 0.1, 0);
+                characterModel2.scale.set(1, 1, 1);
+                    characterModel2.rotation.y += .75;
+
+                characterModel2.visible = false;
+                scene.add(characterModel2);
+
+                mixer3 = new THREE.AnimationMixer(characterModel2);
+                if (gltf.animations && gltf.animations.length) {
+                    mixer3.clipAction(gltf.animations[0]).play();
+                }
+
+                document.getElementById('status').innerText = 'Ready';
+            }, undefined, (err) => {
+                console.error('Error loading no character:', err);
+            });
+
+
 
             animate();
         }
-        function createClouds() {
-            const cloudMat = new THREE.MeshLambertMaterial({
-                color: 0xffb6c1,
-                transparent: true,
-                opacity: .8
-            });
 
-            for (let i = 0; i < 15; i++) {
-                const cloudGroup = new THREE.Group();
-                const partCount = 3 + Math.floor(Math.random() * 3);
-
-                for (let j = 0; j < partCount; j++) {
-                    const size = 0.4 + Math.random() * 0.6;
-                    const part = new THREE.Mesh(new THREE.SphereGeometry(size, 8, 8), cloudMat);
-                    part.position.set(j * 0.4, Math.random() * 0.2, Math.random() * 0.2);
-                    cloudGroup.add(part);
-                }
-
-                // CHANGED: Logic to ensure clouds are only spawned OUTSIDE the room (room is roughly -2 to 2)
-                let x = (Math.random() - 0.5) * 15;
-                let z = (Math.random() - 0.5) * 15;
-
-                // If the random point is inside the room, push it outwards
-                if (Math.abs(x) < 3.5 && Math.abs(z) < 3.5) {
-                    x += x > 0 ? 3.5 : -3.5;
-                    z += z > 0 ? 3.5 : -3.5;
-                }
-
-                cloudGroup.position.set(x, 0.5 + Math.random() * 4, z);
-
-                scene.add(cloudGroup);
-                clouds.push({
-                    mesh: cloudGroup,
-                    speed: 0.002 + Math.random() * 0.005,
-                    offset: Math.random() * Math.PI * 2,
-                    startX: x
-                });
-            }
-        }
 
         function switchCharacter(id) {
-            if (!characterModel || !characterModel1) return;
+            if (!characterModel || !characterModel1 || !characterModel2) return;
 
             if (id === 1) {
-                characterModel.visible = true;
-                characterModel1.visible = false;
-                document.getElementById('btn1').classList.add('active');
-                document.getElementById('btn2').classList.remove('active');
-            } else {
                 characterModel.visible = false;
                 characterModel1.visible = true;
-                document.getElementById('btn2').classList.add('active');
-                document.getElementById('btn1').classList.remove('active');
+                characterModel2.visible = false;
+                document.getElementById('btn-yes').classList.add('active');
+                document.getElementById('btn-no').classList.remove('active');
+            } else if (id === 2) {
+                characterModel.visible = false;
+                characterModel1.visible = false;
+                characterModel2.visible = true;
+                document.getElementById('btn-no').classList.add('active');
+                document.getElementById('btn-yes').classList.remove('active');
             }
-        }
-
-        function onMouseMove(event) {
-            const mouseX = (event.clientX / window.innerWidth) - 0.5;
-            const mouseY = (event.clientY / window.innerHeight) - 0.5;
-            structure.rotation.y = mouseX * 0.15;
-            structure.rotation.x = mouseY * 0.1;
-        }
-
-        function onWheel(event) {
-            event.preventDefault();
-            const zoomSpeed = 0.005;
-            viewSize += event.deltaY * zoomSpeed;
-            viewSize = Math.max(1, Math.min(viewSize, 10));
-            updateCameraProjection();
-        }
-
-        function updateCameraProjection() {
-            const aspect = window.innerWidth / window.innerHeight;
-            camera.left = -viewSize * aspect;
-            camera.right = viewSize * aspect;
-            camera.top = viewSize;
-            camera.bottom = -viewSize;
-            camera.updateProjectionMatrix();
-        }
-
-        function onWindowResize() {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            updateCameraProjection();
         }
 
         function animate() {
             requestAnimationFrame(animate);
 
+            elapsedTime = clock.getElapsedTime();
+
+            // Update scattered objects
+            objects.forEach((obj) => {
+                obj.rotation.y += obj.userData.rotationSpeed;
+                obj.rotation.z += obj.userData.rotationSpeed * 0.5;
+                obj.position.y = (1.5 + Math.sin(elapsedTime * obj.userData.floatSpeed + obj.userData.floatOffset)) * 1.2;
+            });
             const delta = 1 / 100;
             if (characterModel && characterModel.visible && mixer1) mixer1.update(delta);
             if (characterModel1 && characterModel1.visible && mixer2) mixer2.update(delta);
+            if (characterModel2 && characterModel2.visible && mixer3) mixer3.update(delta);
 
             renderer.render(scene, camera);
         }
