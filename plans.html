@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valentine's Day Planner</title>
+    <title>Valentine's Day Destination Guide</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
@@ -31,75 +32,92 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             padding: 2rem 1rem;
+            min-height: 100vh;
         }
 
         header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
         }
 
         header h1 {
             color: var(--pink-dark);
-            font-size: 2.5rem;
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
         }
 
-        .main-layout {
-            max-width: 1200px;
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1100px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 350px 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 2rem;
         }
 
-        /* Lists Styles */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
+        /* Section Styles */
         section {
             background: var(--card-bg);
-            padding: 1.2rem;
+            padding: 2rem;
             border-radius: var(--border-radius);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-            border-top: 6px solid var(--pink-primary);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            border-top: 8px solid var(--pink-primary);
+            transition: transform 0.3s ease;
             position: relative;
         }
 
-        section.sites { border-color: var(--lavender); }
-        section.eat { border-color: var(--peach); }
-        section.activities { border-color: var(--mint); }
+        section:hover {
+            transform: translateY(-5px);
+        }
+
+        section.sites {
+            border-color: var(--lavender);
+        }
+
+        section.eat {
+            border-color: var(--peach);
+        }
+
+        section.activities {
+            border-color: var(--mint);
+        }
 
         h2 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .zoom-icon {
+        .watch-icon {
             cursor: pointer;
-            font-size: 0.9rem;
-            background: #f0f0f0;
-            padding: 4px 8px;
-            border-radius: 8px;
-            transition: background 0.2s;
+            font-size: 0.8rem;
+            background: #f8f8f8;
+            padding: 6px 12px;
+            border-radius: 50px;
+            color: var(--text-color);
+            font-weight: 700;
+            transition: all 0.2s;
+            border: 1px solid #eee;
         }
 
-        .zoom-icon:hover {
+        .watch-icon:hover {
             background: var(--pink-primary);
             color: white;
+            border-color: var(--pink-primary);
         }
 
-        .draggable-item {
-            background: #f9f9f9;
-            border: 2px dashed #ddd;
-            padding: 10px 15px;
+        .list-item {
+            background: #fcfcfc;
+            border: 2px solid #f0f0f0;
+            padding: 14px 20px;
             border-radius: 50px;
-            margin-bottom: 8px;
-            cursor: grab;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -107,113 +125,45 @@
             transition: all 0.2s;
         }
 
-        .draggable-item:hover {
+        .list-item:hover {
             border-color: var(--pink-primary);
             background: #fff;
-            transform: scale(1.02);
         }
 
-        .add-btn {
-            width: 100%;
-            background: none;
-            border: 2px dashed var(--pink-primary);
-            color: var(--pink-dark);
-            padding: 8px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: 700;
-            margin-top: 10px;
-        }
-
-        .add-btn:hover {
-            background: var(--pink-primary);
-            color: white;
-        }
-
-        /* Calendar Styles */
-        .calendar-container {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-
-        .time-grid {
-            display: grid;
-            grid-template-columns: 80px 1fr;
-            border-top: 1px solid #eee;
-        }
-
-        .time-label {
-            padding: 15px 0;
-            font-size: 0.8rem;
-            color: #999;
-            border-bottom: 1px solid #eee;
-            text-align: right;
-            padding-right: 15px;
-        }
-
-        .drop-zone {
-            border-bottom: 1px solid #eee;
-            position: relative;
-            min-height: 50px;
-            background: #fafafa;
-            transition: background 0.2s;
-        }
-
-        .drop-zone.drag-over {
-            background: var(--bg-color);
-        }
-
-        /* Scheduled Task Card */
-        .scheduled-task {
-            position: absolute;
-            left: 5px;
-            right: 5px;
-            top: 2px;
-            z-index: 10;
-            background: var(--pink-primary);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
+        /* Checkbox Styling */
+        .checkbox-container {
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .task-controls {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-top: 4px;
-        }
-
-        .duration-btns {
-            display: flex;
-            gap: 5px;
-        }
-
-        .time-btn {
-            background: rgba(255,255,255,0.3);
-            border: none;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
             cursor: pointer;
-            font-size: 0.7rem;
+            width: 100%;
         }
 
-        .time-btn:hover { background: rgba(255,255,255,0.5); }
+        .checkbox-container input {
+            display: none;
+        }
 
-        .delete-task {
-            cursor: pointer;
-            font-weight: bold;
+        .checkmark {
+            height: 20px;
+            width: 20px;
+            background-color: #eee;
+            border-radius: 50%;
+            margin-right: 12px;
+            display: inline-block;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .checkbox-container:hover input~.checkmark {
+            background-color: #ddd;
+        }
+
+        .checkbox-container input:checked~.checkmark {
+            background-color: var(--pink-primary);
+        }
+
+        .checkbox-container input:checked~span {
+            text-decoration: line-through;
+            opacity: 0.6;
         }
 
         /* Modal Styles */
@@ -224,23 +174,24 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(5px);
+            background: rgba(255, 183, 206, 0.2);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
-            background: var(--bg-color);
+            background: white;
             width: 90%;
-            max-width: 800px;
-            max-height: 80vh;
+            max-width: 600px;
+            max-height: 85vh;
             border-radius: 30px;
             padding: 2.5rem;
             position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
         .modal-header {
@@ -248,293 +199,214 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 1rem;
         }
 
         .close-modal {
             font-size: 2rem;
             cursor: pointer;
             color: var(--pink-dark);
+            line-height: 1;
         }
 
-        .detail-item {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 20px;
-            margin-bottom: 1.5rem;
-            border-left: 8px solid var(--pink-primary);
+        .watchlist-section {
+            margin-bottom: 2rem;
         }
 
-        .detail-item h3 {
-            margin-bottom: 10px;
+        .watchlist-section h3 {
             color: var(--pink-dark);
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--pink-primary);
+            padding-left: 10px;
+            font-size: 1.1rem;
         }
 
-        .detail-inputs {
+        .watch-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            grid-template-columns: 1fr;
+            gap: 8px;
         }
 
-        .detail-inputs input, .detail-inputs textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #eee;
-            border-radius: 10px;
-            font-family: inherit;
+        .watch-item {
+            background: var(--bg-color);
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
         }
 
-        .detail-inputs textarea {
-            grid-column: span 2;
-            resize: none;
-            height: 60px;
+        .watch-item:before {
+            content: '✦';
+            margin-right: 10px;
+            color: var(--pink-primary);
         }
 
-        @media (max-width: 900px) {
-            .main-layout { grid-template-columns: 1fr; }
-            .detail-inputs { grid-template-columns: 1fr; }
-            .detail-inputs textarea { grid-column: span 1; }
+        .divider {
+            height: 2px;
+            background: repeating-linear-gradient(to right, var(--pink-primary) 0, var(--pink-primary) 5px, transparent 5px, transparent 10px);
+            margin: 1.5rem 0;
+            border: none;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 5rem;
+            padding-bottom: 2rem;
+            opacity: 0.5;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <header>
-        <h1>Valentine's Day Scheduler</h1>
-        <p>Drag your favorites or zoom in for more detail</p>
+        <h1>Romantic Getaway</h1>
+        <p>Our curated adventure list</p>
     </header>
 
-    <div class="main-layout">
-        <div class="sidebar">
-            <!-- Section 1: Sites -->
-            <section class="sites" id="sites-list">
-                <h2>🏰 Sites <span class="zoom-icon" onclick="openModal('sites-list')">🔍 Zoom</span></h2>
-                <div class="list-content" ondrop="dropToList(event)" ondragover="allowDrop(event)">
-                    <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="site1">Sunset Bridge Lookout</div>
-                    <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="site2">Botanical Gardens</div>
-                </div>
-                <button class="add-btn" onclick="addNewItem('sites-list')">+ Add Site</button>
-            </section>
+    <main class="container">
+        <!-- Section 1: Sites -->
+        <section class="sites" id="sites-list">
+            <h2>🏰 Sites</h2>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Frankie's</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Museum of Natural Science</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Crab Tree Mall</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Dix Park</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Plant Store</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Fenton Shopping</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Downtown Cary Park</span></label></div>
+        </section>
 
-            <!-- Section 2: Eat -->
-            <section class="eat" id="eat-list">
-                <h2>🍰 Dining <span class="zoom-icon" onclick="openModal('eat-list')">🔍 Zoom</span></h2>
-                <div class="list-content" ondrop="dropToList(event)" ondragover="allowDrop(event)">
-                    <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="eat1">Pink Macaron Cafe</div>
-                    <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="eat2">Candlelit Bistro</div>
-                </div>
-                <button class="add-btn" onclick="addNewItem('eat-list')">+ Add Dining</button>
-            </section>
+        <!-- Section 2: Eat -->
+        <section class="eat" id="eat-list">
+            <h2>🍰 Dining</h2>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Chilis</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Bon Chon</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>BBQ</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Texas Roadhouse</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Rocky Mountain Chocolate Factory</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Brecotea</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Paul and Jack</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Daves Hot Chicken</span></label></div>
+        </section>
 
-            <!-- Section 3: Activities -->
-            <section class="activities" id="activities-list">
-                <h2>🎈 Fun <span class="zoom-icon" onclick="openModal('activities-list')">🔍 Zoom</span></h2>
-                <div class="list-content" ondrop="dropToList(event)" ondragover="allowDrop(event)">
-                    <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="act1">Pottery Class</div>
-                    <div class="draggable-item" draggable="true" ondragstart="drag(event)" id="act2">Jazz Performance</div>
-                </div>
-                <button class="add-btn" onclick="addNewItem('activities-list')">+ Add Activity</button>
-            </section>
-        </div>
+        <!-- Section 3: Activities -->
+        <section class="activities" id="activities-list">
+            <h2>🎈 Fun <span class="watch-icon" onclick="openWatchModal()">🔍 Watch</span></h2>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Arts and Craft</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Movies/Anime Marathon</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Origami</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Terrarium</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Hobby Lobby</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Dollar Tree</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Walking Watching Sunset</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Five Below</span></label></div>
+            <div class="list-item"><label class="checkbox-container"><input type="checkbox"><span
+                        class="checkmark"></span><span>Thrift Store</span></label></div>
+        </section>
+    </main>
 
-        <div class="calendar-container">
-            <h2 style="text-align: left; margin-bottom: 20px;">📅 Today's Schedule</h2>
-            <div id="calendar-grid">
-                <!-- Hours generated by JS -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Zoom Modal -->
-    <div class="modal-overlay" id="zoomModal">
+    <!-- Watchlist Modal -->
+    <div class="modal-overlay" id="watchModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">Section Details</h2>
+                <h2>📺 Stuff to Watch</h2>
                 <span class="close-modal" onclick="closeModal()">&times;</span>
             </div>
-            <div id="modalItemsList">
-                <!-- Items with details go here -->
+
+            <div class="watchlist-section">
+                <h3>Anime Favorites</h3>
+                <div class="watch-grid">
+                    <div class="watch-item">Kaguya-sama Love is War</div>
+                    <div class="watch-item">Chuunibiyo</div>
+                    <div class="watch-item">Ouran High School Look Club</div>
+                    <div class="watch-item">Tsuredure Children</div>
+                    <div class="watch-item">Wotakoi: Love is Hard for Otaku</div>
+                </div>
             </div>
-            <button class="add-btn" id="modalAddBtn">Add New Item to this List</button>
+
+            <hr class="divider">
+
+            <div class="watchlist-section">
+                <h3>Movie Night</h3>
+                <div class="watch-grid">
+                    <div class="watch-item">The Princess Bride</div>
+                    <div class="watch-item">The Princess Diaries</div>
+                    <div class="watch-item">La La Land</div>
+                    <div class="watch-item">10 Things I Hate About You</div>
+                    <div class="watch-item">Titanic</div>
+                    <div class="watch-item">Les Misérables</div>
+                    <div class="watch-item">Rio</div>
+                    <div class="watch-item">Alice in Wonderland</div>
+                    <div class="watch-item">Me Before You</div>
+                    <div class="watch-item">Last Christmas</div>
+                    <div class="watch-item">Challengers</div>
+                    <div class="watch-item">About Time</div>
+                    <div class="watch-item">Lost in Translation</div>
+                    <div class="watch-item">Perks of Being a Wallflower</div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <footer>
+        <p>Crafted with &hearts; for Valentine's Day</p>
+    </footer>
+
     <script>
-        // Data Store for Extra Details
-        const itemDetails = {
-            'site1': { url: '', notes: 'Perfect spot for photos right as the sun dips.' },
-            'site2': { url: '', notes: 'The orchid house is a must-see.' },
-            'eat1': { url: 'https://example.com', notes: 'Best lavender lattes in the city.' },
-            'eat2': { url: '', notes: 'Book the corner table for more privacy.' },
-            'act1': { url: '', notes: 'Wear clothes you don’t mind getting messy!' },
-            'act2': { url: '', notes: 'Show starts at 8, get there early for good seats.' }
-        };
-
-        // Initialize Calendar
-        const grid = document.getElementById('calendar-grid');
-        for (let i = 8; i <= 22; i++) {
-            const hour = i > 12 ? i - 12 : i;
-            const ampm = i >= 12 ? 'PM' : 'AM';
-            
-            const timeRow = document.createElement('div');
-            timeRow.className = 'time-grid';
-            timeRow.innerHTML = `
-                <div class="time-label">${hour}:00 ${ampm}</div>
-                <div class="drop-zone" ondrop="dropToCalendar(event)" ondragover="allowDrop(event)" data-hour="${i}"></div>
-            `;
-            grid.appendChild(timeRow);
-        }
-
-        function allowDrop(e) {
-            e.preventDefault();
-            if (e.target.classList.contains('drop-zone')) {
-                e.target.classList.add('drag-over');
-            }
-        }
-
-        function drag(e) {
-            e.dataTransfer.setData("text", e.target.id);
-            e.dataTransfer.setData("content", e.target.innerText);
-            e.dataTransfer.setData("origin", e.target.parentElement.classList.contains('drop-zone') ? "calendar" : "list");
-        }
-
-        function dropToCalendar(e) {
-            e.preventDefault();
-            const dropZone = e.target.closest('.drop-zone');
-            dropZone.classList.remove('drag-over');
-            
-            const id = e.dataTransfer.getData("text");
-            const content = e.dataTransfer.getData("content");
-            const origin = e.dataTransfer.getData("origin");
-
-            if (origin === "list") {
-                const originalElement = document.getElementById(id);
-                if (originalElement) originalElement.remove();
-            }
-
-            createScheduledTask(dropZone, content, id);
-        }
-
-        function createScheduledTask(container, text, id, height = 46) {
-            container.innerHTML = '';
-            const task = document.createElement('div');
-            task.className = 'scheduled-task';
-            task.id = 'task-' + id;
-            task.style.height = height + 'px';
-            
-            task.innerHTML = `
-                <span>${text}</span>
-                <div class="task-controls">
-                    <div class="duration-btns">
-                        <button class="time-btn" onclick="adjustTime(this, -15)">-15</button>
-                        <button class="time-btn" onclick="adjustTime(this, 15)">+15</button>
-                    </div>
-                    <span class="delete-task" onclick="returnToList(this, '${text}', '${id}')">✕</span>
-                </div>
-            `;
-            container.appendChild(task);
-        }
-
-        function adjustTime(btn, amount) {
-            const task = btn.closest('.scheduled-task');
-            let currentHeight = parseInt(task.style.height);
-            let newHeight = currentHeight + (amount * (50/60));
-            if (newHeight < 30) newHeight = 30;
-            task.style.height = newHeight + 'px';
-            task.style.zIndex = Math.floor(newHeight);
-        }
-
-        function returnToList(btn, text, id) {
-            const task = btn.closest('.scheduled-task');
-            task.remove();
-            
-            let listId = 'activities-list';
-            if (id.startsWith('site')) listId = 'sites-list';
-            if (id.startsWith('eat')) listId = 'eat-list';
-            
-            const listContent = document.getElementById(listId).querySelector('.list-content');
-            const item = createDraggableElement(id, text);
-            listContent.appendChild(item);
-        }
-
-        function createDraggableElement(id, text) {
-            const item = document.createElement('div');
-            item.className = 'draggable-item';
-            item.draggable = true;
-            item.id = id;
-            item.innerText = text;
-            item.ondragstart = drag;
-            return item;
-        }
-
-        function addNewItem(sectionId, preFilledText = null) {
-            const text = preFilledText || prompt("What would you like to add?");
-            if (!text) return;
-
-            const listContent = document.getElementById(sectionId).querySelector('.list-content');
-            const id = (sectionId.split('-')[0].slice(0, 3)) + '-' + Date.now();
-            
-            const item = createDraggableElement(id, text);
-            listContent.appendChild(item);
-            
-            // Add to data store
-            itemDetails[id] = { url: '', notes: '' };
-            
-            // If modal is open, refresh it
-            if (document.getElementById('zoomModal').style.display === 'flex') {
-                openModal(sectionId);
-            }
-        }
-
-        // Modal Logic
-        function openModal(sectionId) {
-            const modal = document.getElementById('zoomModal');
-            const title = document.getElementById('modalTitle');
-            const list = document.getElementById('modalItemsList');
-            const section = document.getElementById(sectionId);
-            
-            title.innerText = section.querySelector('h2').innerText.replace('🔍 Zoom', '');
-            list.innerHTML = '';
-            
-            // Get all items in this section's list
-            const items = section.querySelectorAll('.draggable-item');
-            items.forEach(item => {
-                const details = itemDetails[item.id] || { url: '', notes: '' };
-                const div = document.createElement('div');
-                div.className = 'detail-item';
-                div.innerHTML = `
-                    <h3>${item.innerText}</h3>
-                    <div class="detail-inputs">
-                        <input type="text" placeholder="Website URL (e.g. reservation link)" value="${details.url}" onchange="updateDetails('${item.id}', 'url', this.value)">
-                        <textarea placeholder="Extra notes (Address, what to wear, etc.)" onchange="updateDetails('${item.id}', 'notes', this.value)">${details.notes}</textarea>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
-
-            document.getElementById('modalAddBtn').onclick = () => addNewItem(sectionId);
-            modal.style.display = 'flex';
+        function openWatchModal() {
+            document.getElementById('watchModal').style.display = 'flex';
         }
 
         function closeModal() {
-            document.getElementById('zoomModal').style.display = 'none';
+            document.getElementById('watchModal').style.display = 'none';
         }
 
-        function updateDetails(id, field, value) {
-            if (!itemDetails[id]) itemDetails[id] = { url: '', notes: '' };
-            itemDetails[id][field] = value;
-        }
-
-        function dropToList(e) {
-            e.preventDefault();
-        }
-
-        // Close modal on outside click
-        window.onclick = function(event) {
-            const modal = document.getElementById('zoomModal');
+        window.onclick = function (event) {
+            const modal = document.getElementById('watchModal');
             if (event.target == modal) {
                 closeModal();
             }
         }
     </script>
 </body>
+
 </html>
